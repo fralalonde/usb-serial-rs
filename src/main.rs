@@ -9,10 +9,10 @@
 #![no_std]
 #![no_main]
 
-use panic_rtt_target as _;
+// use panic_rtt_target as _;
 
-// use panic_probe as _;
-// use defmt_rtt as _;
+use panic_probe as _;
+use defmt_rtt as _;
 
 use trinket_m0 as bsp;
 use bsp::hal;
@@ -45,9 +45,9 @@ static mut USB_SERIAL: Option<SerialPort<UsbBus>> = None;
 
 const RXC: u8 = 0x04;
 
-// defmt::timestamp!("{=u32:us}", {
-//     0
-// });
+defmt::timestamp!("{=u32:us}", {
+    0
+});
 
 #[trinket_m0::entry]
 fn main() -> ! {
@@ -62,7 +62,7 @@ fn main() -> ! {
     let mut pins = bsp::Pins::new(peripherals.PORT);
     let mut red_led = pins.d13.into_open_drain_output(&mut pins.port);
 
-    rtt_target::rtt_init_print!(NoBlockSkip, 1024);
+    // rtt_target::rtt_init_print!(NoBlockSkip, 1024);
 
     let bus_allocator = unsafe {
         USB_ALLOCATOR = Some(bsp::usb_allocator(
@@ -110,8 +110,8 @@ fn main() -> ! {
         // BLINK IT LIKE YOU STOLE IT
         red_led.toggle();
         cycle_delay(25_000_000);
-        // defmt::println!("blinky");
-        rtt_target::rprintln!("blinky");
+        defmt::println!("blinky");
+        // rtt_target::rprintln!("blinky");
     }
 }
 
@@ -136,8 +136,8 @@ fn SERCOM0() {
     let uart_serial = unsafe { UART_SERIAL.as_mut().unwrap() };
     if let Ok(byte) = uart_serial.read() {
         if let Err(e) = usb_serial.write(&[byte]) {
-            // defmt::info!("USB write err {:?}", e);
-            rtt_target::rprintln!("USB write err {:?}", e);
+            defmt::info!("USB write err {:?}", e);
+            // rtt_target::rprintln!("USB write err {:?}", e);
         }
     }
 }
