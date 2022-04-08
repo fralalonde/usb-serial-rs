@@ -1,6 +1,8 @@
 #! /bin/sh
 
-# start OpenOCD RTT server and connect to it
+# CLion embedded debugging starts OpenOCD but does not stream printed log
+# fix this using recipe from https://ferrous-systems.com/blog/gdb-and-defmt/
+# start OpenOCD RTT server and then stream from it
 # requires netcat (nc)
 
 BASEDIR="$( cd "$( dirname "$0" )" && pwd )"
@@ -18,9 +20,11 @@ else
 fi
 
 if ! nc -z localhost $RTT_PORT; then
+  # get address of static RTT buffer from binary
   block_addr=0x$(rust-nm -S $ELF_FILE | grep SEGGER_RTT | cut -d' ' -f1)
   echo "Starting RTT from block addr $block_addr"
 
+  # tell GDB to start its RTT server
   # see  https://stackoverflow.com/questions/48578664/capturing-telnet-timeout-from-bash
   nc localhost $TELNET_PORT <<EOF
 rtt server start $RTT_PORT 0
@@ -38,10 +42,10 @@ else
 fi
 
 # if using plain RTT https://crates.io/crates/rtt-target
-#echo "Watching RTT"
+#echo "Watching RTT/text"
 #nc localhost $RTT_PORT
 
-# if using defmt over RTT https://ferrous-systems.com/blog/gdb-and-defmt/
+# if using defmt over RTT
 echo "Watching RTT/defmt"
 nc localhost $RTT_PORT | defmt-print -e $ELF_FILE
 

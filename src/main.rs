@@ -9,10 +9,9 @@
 #![no_std]
 #![no_main]
 
-// use panic_rtt_target as _;
-
 use panic_probe as _;
 use defmt_rtt as _;
+use defmt::{info, debug, error, warn};
 
 use trinket_m0 as bsp;
 use bsp::hal;
@@ -62,8 +61,6 @@ fn main() -> ! {
     let mut pins = bsp::Pins::new(peripherals.PORT);
     let mut red_led = pins.d13.into_open_drain_output(&mut pins.port);
 
-    // rtt_target::rtt_init_print!(NoBlockSkip, 1024);
-
     let bus_allocator = unsafe {
         USB_ALLOCATOR = Some(bsp::usb_allocator(
             peripherals.USB,
@@ -107,11 +104,9 @@ fn main() -> ! {
     }
 
     loop {
-        // BLINK IT LIKE YOU STOLE IT
         red_led.toggle();
         cycle_delay(25_000_000);
-        defmt::println!("blinky");
-        // rtt_target::rprintln!("blinky");
+        defmt::println!("BLINK IT LIKE YOU STOLE IT");
     }
 }
 
@@ -137,7 +132,6 @@ fn SERCOM0() {
     if let Ok(byte) = uart_serial.read() {
         if let Err(e) = usb_serial.write(&[byte]) {
             defmt::info!("USB write err {:?}", e);
-            // rtt_target::rprintln!("USB write err {:?}", e);
         }
     }
 }
