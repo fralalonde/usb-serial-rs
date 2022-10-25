@@ -34,6 +34,7 @@ STLinkV2-compatible probes also work... until they don't (why?)
 If not already installed, run
 
     cargo install probe-run
+    cargo install flip-link
 
 And then
 
